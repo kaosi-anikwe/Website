@@ -1,0 +1,5 @@
+.DS_Store
+.flaskenv
+.vscode
+env
+__pycache__
