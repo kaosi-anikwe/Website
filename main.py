@@ -1,6 +1,5 @@
-from . import create_app
+from flaskr import create_app, db
 from flask import Blueprint, render_template
-from . import db
 
 
 main = Blueprint('main', __name__)
