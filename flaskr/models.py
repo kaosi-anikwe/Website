@@ -2,7 +2,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from datetime import datetime
 from sqlalchemy import ForeignKey, Boolean
-from flaskr import db
+from flaskr import db, login_manager
+
+@login_manager.user_loader
+def load_user(user):
+    return Users.get(user)
 
 
 class Users(UserMixin, db.Model):
