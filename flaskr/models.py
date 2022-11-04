@@ -1,10 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 from datetime import datetime
 from sqlalchemy import ForeignKey, Boolean
 from flaskr import db
 
 
-class Users(db.Model):
+class Users(UserMixin, db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(45), nullable=False)
