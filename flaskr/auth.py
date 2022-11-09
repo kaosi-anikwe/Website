@@ -9,6 +9,10 @@ auth = Blueprint('auth', __name__)
 
 from flask import Blueprint, render_template
 
+@auth.route("/")
+def landing():
+    return render_template("landing.html")
+
 @auth.route('/login')
 def login():
     return render_template('login.html')

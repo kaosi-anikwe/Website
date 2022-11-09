@@ -5,8 +5,8 @@ from sqlalchemy import ForeignKey, Boolean
 from flaskr import db, login_manager
 
 @login_manager.user_loader
-def load_user(user):
-    return Users.get(user)
+def load_user(user_id):
+    return Users.query.get(int(user_id))
 
 
 class Users(UserMixin, db.Model):
@@ -47,8 +47,8 @@ class Courses(db.Model):
     quizzes = db.Column(db.Integer, nullable=False)
     is_admin = db.Column(Boolean, default=False, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    course_id = db.Column(db.Integer, ForeignKey('course.id'))
-    user = db.relationship("User", backref=db.backref("user", uselist=False))
+    # course_id = db.Column(db.Integer, ForeignKey('course.id'))
+    user = db.relationship("Users", backref=db.backref("user", uselist=False))
 
     def insert(self):
         db.session.add(self)
@@ -68,4 +68,4 @@ class Enrolled(db.Model):
     enrollment = db.Column(db.Boolean, nullable=False)
     student_id = db.Column(db.Integer, ForeignKey('user.id'))
     course_id = db.Column(db.Integer, ForeignKey('course.id'))
-    course = db.relationship("Course", backref=db.backref("course"))
+    course = db.relationship("Courses", backref=db.backref("course"))

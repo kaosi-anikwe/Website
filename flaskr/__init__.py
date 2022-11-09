@@ -9,6 +9,7 @@ load_dotenv()
 
 # get remote db URI from environment variables
 remote_db = os.getenv("REMOTE_DB")
+local_db = os.getenv("LOCAL_DB")
 
 db = SQLAlchemy()
 migrate = Migrate()
