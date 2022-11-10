@@ -11,7 +11,7 @@ from flask import Blueprint, render_template
 
 @auth.route("/")
 def landing():
-    return render_template("landing.html")
+    return render_template("base.html")
 
 @auth.route('/login')
 def login():

@@ -9,11 +9,24 @@ def load_user(user_id):
     return Users.query.get(int(user_id))
 
 
-enrolled = db.Table("enrolled", 
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
-    db.Column("course_id", db.Integer, db.ForeignKey("course.id")),
-    db.Column("completed", db.Boolean, default=False, nullable=False)
-)
+# enrolled = db.Table("enrolled", 
+#     db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+#     db.Column("course_id", db.Integer, db.ForeignKey("course.id")),
+#     db.Column("completed", db.Boolean, default=False, nullable=False),
+#     db.Column("percent_complete", db.Integer, default=0, nullable=False)
+# )
+class Enrolled(db.Model):
+    __tablename__ = "enrolled"
+    user_id = db.Column(ForeignKey("user.id"), primary_key=True)
+    course_id = db.Column(ForeignKey("course.id"), primary_key=True)
+    completed = db.Column(db.Boolean, default=False, nullable=False)
+    percent_complete = db.Column(db.Integer, default=0, nullable=False)
+
+    course = db.relationship("Courses", back_populates="users")
+    user = db.relationship("Users", back_populates="courses")
+
+    def update(self):
+        db.session.commit()
 
 class Users(UserMixin, db.Model):
     __tablename__ = "user"
@@ -25,7 +38,7 @@ class Users(UserMixin, db.Model):
     date_created = db.Column(db.DATE, default=datetime.now())
     status = db.Column(db.Boolean, default=False, nullable=False)
     account = db.Column(db.String(12), default='student', nullable=False)
-    courses = db.relationship("Courses", secondary=enrolled, lazy="joined", backref=db.backref("users"))
+    courses = db.relationship("Enrolled", back_populates="user")
 
     def __init__(self, firstname, lastname, email, password):
         self.firstname = firstname
@@ -52,9 +65,9 @@ class Courses(db.Model):
     progress = db.Column(db.Integer, nullable=False)
     lectures = db.Column(db.Integer, nullable=False)
     quizzes = db.Column(db.Integer, nullable=False)
-    # is_admin = db.Column(Boolean, default=False, nullable=False)
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # course_id = db.Column(db.Integer, ForeignKey('course.id'))
+    thumbnail = db.Column(db.String(500))
+    video_id = db.Column(db.String(20), nullable=False)
+    users = db.relationship("Enrolled", back_populates="course")
 
     def insert(self):
         db.session.add(self)
