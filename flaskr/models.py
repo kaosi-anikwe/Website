@@ -9,6 +9,12 @@ def load_user(user_id):
     return Users.query.get(int(user_id))
 
 
+enrolled = db.Table("enrolled", 
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("course_id", db.Integer, db.ForeignKey("course.id")),
+    db.Column("completed", db.Boolean, default=False, nullable=False)
+)
+
 class Users(UserMixin, db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
@@ -19,6 +25,7 @@ class Users(UserMixin, db.Model):
     date_created = db.Column(db.DATE, default=datetime.now())
     status = db.Column(db.Boolean, default=False, nullable=False)
     account = db.Column(db.String(12), default='student', nullable=False)
+    courses = db.relationship("Courses", secondary=enrolled, lazy="joined", backref=db.backref("users"))
 
     def __init__(self, firstname, lastname, email, password):
         self.firstname = firstname
@@ -45,10 +52,9 @@ class Courses(db.Model):
     progress = db.Column(db.Integer, nullable=False)
     lectures = db.Column(db.Integer, nullable=False)
     quizzes = db.Column(db.Integer, nullable=False)
-    is_admin = db.Column(Boolean, default=False, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # is_admin = db.Column(Boolean, default=False, nullable=False)
+    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     # course_id = db.Column(db.Integer, ForeignKey('course.id'))
-    user = db.relationship("Users", backref=db.backref("user", uselist=False))
 
     def insert(self):
         db.session.add(self)
@@ -62,10 +68,10 @@ class Courses(db.Model):
         db.session.commit()
 
 
-class Enrolled(db.Model):
-    __tablename__ = "enrolled"
-    id = db.Column(db.Integer, primary_key=True)
-    enrollment = db.Column(db.Boolean, nullable=False)
-    student_id = db.Column(db.Integer, ForeignKey('user.id'))
-    course_id = db.Column(db.Integer, ForeignKey('course.id'))
-    course = db.relationship("Courses", backref=db.backref("course"))
+# class Enrolled(db.Model):
+#     __tablename__ = "enrolled"
+#     id = db.Column(db.Integer, primary_key=True)
+#     enrollment = db.Column(db.Boolean, nullable=False)
+#     student_id = db.Column(db.Integer, ForeignKey('user.id'))
+#     course_id = db.Column(db.Integer, ForeignKey('course.id'))
+#     course = db.relationship("Courses", backref=db.backref("course"))
