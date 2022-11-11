@@ -21,7 +21,7 @@ def create_app():
 
     # app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://ba9ae764e59af3:834d6bc9@us-cdbr-east-04.cleardb.com" \
     # "/heroku_a0fdeca9b5d4d8d"
-    app.config["SQLALCHEMY_DATABASE_URI"] = remote_db
+    app.config["SQLALCHEMY_DATABASE_URI"] = local_db
     app.config['SECRET_KEY'] = "secret"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config['SQLALCHEMY_POOL_RECYCLE'] = 60

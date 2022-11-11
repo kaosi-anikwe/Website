@@ -4,12 +4,13 @@ from datetime import datetime
 from sqlalchemy import ForeignKey, Boolean
 from flaskr import db, login_manager
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
 
-# enrolled = db.Table("enrolled", 
+# enrolled = db.Table("enrolled",
 #     db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
 #     db.Column("course_id", db.Integer, db.ForeignKey("course.id")),
 #     db.Column("completed", db.Boolean, default=False, nullable=False),
@@ -28,6 +29,7 @@ class Enrolled(db.Model):
     def update(self):
         db.session.commit()
 
+
 class Users(UserMixin, db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
@@ -37,7 +39,7 @@ class Users(UserMixin, db.Model):
     password = db.Column(db.String(500), nullable=False)
     date_created = db.Column(db.DATE, default=datetime.now())
     status = db.Column(db.Boolean, default=False, nullable=False)
-    account = db.Column(db.String(12), default='student', nullable=False)
+    account = db.Column(db.String(12), default="student", nullable=False)
     courses = db.relationship("Enrolled", back_populates="user")
 
     def __init__(self, firstname, lastname, email, password):
@@ -49,7 +51,7 @@ class Users(UserMixin, db.Model):
     def insert(self):
         db.session.add(self)
         db.session.commit()
-    
+
     def update(self):
         db.session.commit()
 
@@ -72,7 +74,7 @@ class Courses(db.Model):
     def insert(self):
         db.session.add(self)
         db.session.commit()
-    
+
     def update(self):
         db.session.commit()
 
