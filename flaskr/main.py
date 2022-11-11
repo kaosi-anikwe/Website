@@ -21,30 +21,12 @@ def index():
     # get all courses for current user
     # courses = current_user.courses
     # courses = Enrolled.query.filter(Enrolled.user_id == current_user.id).all()
-    courses = (
+    get_courses = (
         Courses.query.join(Enrolled)
         .filter(Enrolled.user_id == current_user.id)
         .filter(Courses.id == Enrolled.course_id)
         .all()
     )
-    courses_info = []
-
-    for course in courses:
-        courses_info.append(
-            {
-                "video_id": course.video_id,
-                "thumbnail": course.thumbnail,
-                "title": course.title,
-            }
-        )
-
-    return render_template("home.html", courses_info=courses_info)
-
-
-@main.route("/courses")
-def all_courses():
-    # get all courses
-    get_courses = Courses.query.all()
     courses = []
 
     for course in get_courses:
@@ -54,6 +36,38 @@ def all_courses():
                 "thumbnail": course.thumbnail,
                 "title": course.title,
                 "category": course.category
+            }
+        )
+
+    return render_template("home.html", courses=courses)
+
+
+@main.route("/courses")
+def all_courses():
+    # get all courses
+    get_courses = Courses.query.all()
+    check_enrolled = Enrolled.query.all()
+    courses = []
+
+    for course in get_courses:
+        enrolled = False
+        for enroll in check_enrolled:
+            if enroll.user_id == current_user.id and enroll.course_id == course.id:
+                enrolled = True
+        courses.append(
+            {
+                "course_id": course.id,
+                "title": course.title,
+                "category": course.category,
+                "summary": course.summary,
+                "requirements": course.requirements,
+                "duration": course.duration,
+                "lectures": course.lectures,
+                "quizzes": course.quizzes,
+                "thumbnail": course.thumbnail,
+                "title": course.title,
+                "category": course.category,
+                "enrolled": enrolled
             }
         )
 
@@ -80,6 +94,7 @@ def enroll(course_id):
         course = Courses.query.get(course_id)
         enrolled.course = course
         current_user.courses.append(enrolled)
+        current_user.update()
 
         return jsonify({"success": True})
     except:

@@ -1,14 +1,19 @@
-from flask import Blueprint, redirect, url_for, request, flash, session, abort
+from flask import Blueprint, redirect, url_for, request, flash, session, abort, render_template
 from flask_login import login_user, login_required, logout_user, current_user
 from flaskr import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flaskr.models import Users
 import bcrypt
+import hashlib
 
 auth = Blueprint("auth", __name__)
 
-from flask import Blueprint, render_template
-
+def getHashed(text):  # function to get hashed email/password as it is reapeatedly used
+    salt = "ITSASECRET"  # salt for password security
+    hashed = text + salt  # salt for password security, a random string will be added to password and hashed together below
+    hashed = hashlib.md5(hashed.encode())  # encrypting with md5 hash, best for generating passwords for db
+    hashed = hashed.hexdigest()  # converting to string
+    return hashed  # gives hashed text back
 
 @auth.route("/")
 def landing():
@@ -26,11 +31,12 @@ def signin():
 
     email = form.get("email")
     password = form.get("password")
-    user = Users.query.filter(Users.email == email).one()
+    user = Users.query.filter(Users.email == email).one_or_none()
 
     if not user:
-        abort(404)
-    if bcrypt.checkpw(password, user.password):
+        flash("User not found")
+        return render_template("login.html")
+    if getHashed(password) == user.password:
         login_user(user)
         return redirect(url_for("main.index"))
     else:
@@ -79,7 +85,8 @@ def signup_page():
             return render_template("thanks.html", comment=comment, miss=True)
         else:  # adding record in database
             # hash the password and encode it
-            hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+            hashed = getHashed(password)
+            # hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
             new_user = Users(fname, lname, email, hashed)
             new_user.insert()

@@ -18,7 +18,7 @@ def load_user(user_id):
 # )
 class Enrolled(db.Model):
     __tablename__ = "enrolled"
-    user_id = db.Column(ForeignKey("user.id"), primary_key=True)
+    user_id = db.Column(ForeignKey("user.id"), primary_key=True, autoincrement=True)
     course_id = db.Column(ForeignKey("course.id"), primary_key=True)
     completed = db.Column(db.Boolean, default=False, nullable=False)
     percent_complete = db.Column(db.Integer, default=0, nullable=False)

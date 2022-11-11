@@ -1,71 +1,54 @@
-{% extends "main.html" %} {% block content %}
+{% extends "main.html" %} {% block content %} {% block title %}elEARN |
+Courses{% endblock %}
 
+<br />
 <div style="text-shadow: 2px 2px black">
-  <h1>Courses</h1>
+  <h1 style="margin: 2rem">Courses</h1>
 </div>
+<div class="container marketing">
+  {% for course in courses %}
+  <hr class="featurette-divider" />
 
-<div
-  id="carouselExampleIndicators"
-  class="carousel slide"
-  data-ride="carousel"
-  style="width: 80%; height: auto"
->
-  <ol class="carousel-indicators">
-    <li
-      data-target="#carouselExampleIndicators"
-      data-slide-to="0"
-      class="active"
-    ></li>
-    {% for i in range(start=1, len(courses)) %}
-    <li
-      data-target="#carouselExampleIndicators"
-      data-slide-to="{{ courses[i] }}"
-      class=""
-    ></li>
-    {% endfor %}
-  </ol>
-  <div class="carousel-inner">
-    {% for course in courses %}
-    <a href="/courses/{{ course['course_id'] }}">
-      <div class="carousel-item align-items-center active">
-        <img
-          class="d-block w-100"
-          src="{{ course['thumbnail'] }}"
-          alt="slide{{ courses.index(course) }}"
-        />
-        <div
-          class="carousel-caption d-flex flex-column justify-content-center h-100"
-          style="top: 0"
-        >
-          <div style="text-shadow: 2px 2px black">
-            <h1>{{ course['category'] }}</h1>
-            <h2>{{ course['title'] }}</h2>
-          </div>
-        </div>
+  <div class="row featurette">
+    <div class="col-md-7">
+      <h2 class="featurette-heading" style="margin-top: auto">
+        {{ course['title'] }}
+        <!--<span class="text-muted">It'll blow your mind.</span>-->
+      </h2>
+      <p class="lead">{{ course['summary'] }}</p>
+      <p class="lead">
+        <span class="text-muted">Category:</span> {{ course['category'] }}
+      </p>
+      <p class="lead">
+        <span class="text-muted">Requirements:</span> {{ course['requirements']
+        }}
+      </p>
+      <p class="lead">
+        <span class="text-muted">Duration:</span> {{ course['duration'] }}
+      </p>
+      <p class="lead">
+        <span class="text-muted">Lectures:</span> {{ course['lectures'] }}
+      </p>
+      <p class="lead">
+        <span class="text-muted">Quizzes:</span> {{ course['quizzes'] }}
+      </p>
+    </div>
+    <div class="col-md-5">
+      <img
+        class="featurette-image img-fluid mx-auto"
+        src="{{ course['thumbnail'] }}"
+        alt="Generic placeholder image"
+      />
+      <div class="enroll-btn">
+        {% if course['enrolled'] %}
+        <button class="btn btn-secondary" disabled>Enrolled</button>
+        {% else %}
+        <button class="btn btn-secondary">Enroll</button>
+        {% endif %}
       </div>
-    </a>
-
-    {% endfor %}
-
-    <a
-      class="carousel-control-prev"
-      href="#carouselExampleIndicators"
-      role="button"
-      data-slide="prev"
-    >
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="sr-only">Previous</span>
-    </a>
-    <a
-      class="carousel-control-next"
-      href="#carouselExampleIndicators"
-      role="button"
-      data-slide="next"
-    >
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="sr-only">Next</span>
-    </a>
+    </div>
   </div>
+  {% endfor %}
 </div>
 
 {% endblock %}
