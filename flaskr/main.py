@@ -9,7 +9,7 @@ from flask import (
     jsonify,
     abort,
 )
-from flask_login import current_user
+from flask_login import current_user, login_required
 from flaskr.models import *
 
 
@@ -17,32 +17,49 @@ main = Blueprint("main", __name__)
 
 
 @main.route("/home")
+@login_required
 def index():
     # get all courses for current user
     # courses = current_user.courses
     # courses = Enrolled.query.filter(Enrolled.user_id == current_user.id).all()
+    courses = []
+    enrolled_courses = []
+    completed_courses = []
+
     get_courses = (
         Courses.query.join(Enrolled)
         .filter(Enrolled.user_id == current_user.id)
         .filter(Courses.id == Enrolled.course_id)
         .all()
     )
-    courses = []
 
     for course in get_courses:
-        courses.append(
-            {
-                "course_id": course.id,
-                "thumbnail": course.thumbnail,
-                "title": course.title,
-                "category": course.category
-            }
-        )
+        enroll = Enrolled.query.filter(Enrolled.user_id == current_user.id, Enrolled.course_id == course.id).first()
+        if not enroll.completed:
+            courses.append(
+                {
+                    "course_id": course.id,
+                    "thumbnail": course.thumbnail,
+                    "title": course.title,
+                    "category": course.category,
+                    "percent_complete": enroll.percent_complete
+                }
+            )
+        else:
+            completed_courses.append(
+                {
+                    "course_id": course.id,
+                    "thumbnail": course.thumbnail,
+                    "title": course.title,
+                    "category": course.category,
+                }
+            )
 
-    return render_template("home.html", courses=courses)
+    return render_template("home.html", courses=courses, completed_courses=completed_courses)
 
 
 @main.route("/courses")
+@login_required
 def all_courses():
     # get all courses
     get_courses = Courses.query.all()
@@ -75,33 +92,37 @@ def all_courses():
 
 
 @main.route("/courses/<int:course_id>")
+@login_required
 def show_course(course_id):
     # get all info for particular course
     course = Courses.query.get(course_id)
-    check_enrolled = Enrolled.query.filter(
+    enrolled = Enrolled.query.filter(
         Enrolled.course_id == course_id, Enrolled.user_id == current_user.id
     ).first()
-    enrolled = True if check_enrolled else False
+    # enrolled = True if check_enrolled else False
 
     return render_template("show_course.html", course=course, enrolled=enrolled)
 
 
 @main.route("/courses/enroll/<int:course_id>")
+@login_required
 def enroll(course_id):
     # enroll in a course
-    try:
-        enrolled = Enrolled()
-        course = Courses.query.get(course_id)
-        enrolled.course = course
-        current_user.courses.append(enrolled)
-        current_user.update()
+    # try:
+    enrolled = Enrolled()
+    course = Courses.query.get(course_id)
+    enrolled.course = course
+    enrolled.user_id = current_user.id
+    current_user.courses.append(enrolled)
+    current_user.update()
 
-        return jsonify({"success": True})
-    except:
-        return jsonify({"success": False})
+    return jsonify({"success": True})
+    # except:
+    #     return jsonify({"success": False})
 
 
 @main.route("/courses/add-course", methods=["GET", "POST"])
+@login_required
 def add_course():
     if request.method == "GET":
         return render_template("add_course.html")
@@ -132,14 +153,14 @@ def add_course():
         )
         new_course.insert()
         message = "Course added successfully"
-    except:
-        message = "Failed to add course"
-    finally:
-        flash(message)
         return redirect(url_for("main.add_course"))
+    except:
+        return jsonify({"success": False})
+
 
 
 @main.route("/courses/complete/<int:course_id>")
+@login_required
 def complete(course_id):
     enrolled_course = Enrolled.query.filter(
         Enrolled.course_id == course_id, Enrolled.user_id == current_user.id
@@ -162,73 +183,96 @@ def complete(course_id):
 
 
 @main.route("/user/edit-user")
+@login_required
 def show_users():
-    users = Users.query.all()
+    users = Users.query.filter(Users.account == "student").all()
+    courses = []
+    enrolled = []
 
-    return render_template("show_user.html", users=users)
+    for user in users:
+        get_enrolled = []
+        get_courses = (
+            Courses.query.join(Enrolled)
+            .filter(Enrolled.user_id == user.id)
+            .filter(Courses.id == Enrolled.course_id)
+            .all()
+        )
+        for course in get_courses:
+            enroll = Enrolled.query.filter(Enrolled.user_id == user.id, Enrolled.course_id == course.id).one_or_none()
+            get_enrolled.append(enroll) if enroll else get_enrolled.append(None)
+        courses.append(get_courses)
+        enrolled.append(get_enrolled)
+
+
+    return render_template("show_user.html", users=users, courses=courses, enrolled=enrolled)
 
 
 @main.route("/user/edit-user/<int:user_id>", methods=["GET", "POST"])
+@login_required
 def edit_user(user_id):
     user = Users.query.get(user_id)
     if request.method == "GET":
-        return render_template("edit_user.html", user=user)
+        enrolled = []
+        courses = Courses.query.all()
+
+        for course in courses:
+            enroll = Enrolled.query.filter(Enrolled.user_id == user.id, Enrolled.course_id == course.id).one_or_none()
+            enrolled.append(enroll) if enroll else enrolled.append(None)
+
+        return render_template("edit_user.html", user=user, courses=courses, enrolled=enrolled)
 
     data = request.form
     courses = data.getlist("courses")  # list of course ids
-
+    courses = [int(course) for course in courses]
+    temp_list = []
+    get_courses = (
+        Courses.query.join(Enrolled)
+        .filter(Enrolled.user_id == user_id)
+        .filter(Courses.id == Enrolled.course_id)
+        .all()
+    )
     try:
-        # remove old courses
-        get_courses = (
-            Courses.query.join(Enrolled)
-            .filter(Enrolled.user_id == current_user.id)
-            .filter(Courses.id == Enrolled.course_id)
-            .all()
-        )
-
         user_courses = [course.id for course in get_courses]
 
-        for course_id in courses:
-            for user_course in user_courses:
-                if user_course not in courses:
-                    course = Courses.query.get(user_course)
-                    user.courses.remove(course)
-                    user_courses.pop(user_courses.index(user_course))
-        user.update()
+        # remove old courses
+        for course_id in user_courses:
+            if course_id not in courses:
+                course = Courses.query.get(course_id)
+                enrolled = Enrolled.query.filter(Enrolled.course_id == course_id, Enrolled.user_id == user_id).one()
+                user.courses.remove(enrolled)
+                enrolled.delete()
+            else:
+                temp_list.append(course_id)
 
         # add new courses
-        get_courses = (
-            Courses.query.join(Enrolled)
-            .filter(Enrolled.user_id == current_user.id)
-            .filter(Courses.id == Enrolled.course_id)
-            .all()
-        )
-        user_courses = [course.id for course in get_courses]
-
         for course_id in courses:
-            for user_course in user_courses:
-                if course_id not in user_courses:
-                    course = Courses.query.get(course_id)
-                    user.courses.append(course)
-                    user_courses.append(course_id)
-        user.update()
+            if course_id not in temp_list:
+                enrolled = Enrolled()
+                course = Courses.query.get(course_id)
+                enrolled.course = course
+                enrolled.course_id = course_id
+                enrolled.user_id = user_id
+                user.courses.append(enrolled)
+                enrolled.insert()
 
-        message = "User updated successfully"
-    except:
-        message = "Failed to update user"
-    finally:
-        flash(message)
         return redirect(url_for("main.show_users"))
+    except:
+        return "failed"
+
 
 
 @main.route("/user/courses/update/<int:course_id>", methods=["GET", "POST"])
+@login_required
 def update_course(course_id):
-    percent_complete = request.args.get("percent_complete")
+    percent_complete = int(request.args.get("percent_complete"))
     enrolled_course = Enrolled.query.filter(
         Enrolled.course_id == course_id, Enrolled.user_id == current_user.id
     ).first()
     try:
-        enrolled_course.percent_complete = percent_complete
+        if percent_complete == 100:
+            enrolled_course.completed = True        
+        if percent_complete > enrolled_course.percent_complete:
+            enrolled_course.percent_complete = percent_complete
         enrolled_course.update()
 
         return jsonify({"success": True})

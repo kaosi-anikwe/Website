@@ -18,8 +18,9 @@ def load_user(user_id):
 # )
 class Enrolled(db.Model):
     __tablename__ = "enrolled"
-    user_id = db.Column(ForeignKey("user.id"), primary_key=True, autoincrement=True)
-    course_id = db.Column(ForeignKey("course.id"), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(ForeignKey("user.id"), nullable=False)
+    course_id = db.Column(ForeignKey("course.id"), nullable=False)
     completed = db.Column(db.Boolean, default=False, nullable=False)
     percent_complete = db.Column(db.Integer, default=0, nullable=False)
 
@@ -27,6 +28,14 @@ class Enrolled(db.Model):
     user = db.relationship("Users", back_populates="courses")
 
     def update(self):
+        db.session.commit()
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
         db.session.commit()
 
 
@@ -64,7 +73,6 @@ class Courses(db.Model):
     summary = db.Column(db.String(1000), nullable=False)
     requirements = db.Column(db.String(2000), nullable=False)
     duration = db.Column(db.String(50))
-    progress = db.Column(db.Integer, nullable=False)
     lectures = db.Column(db.Integer, nullable=False)
     quizzes = db.Column(db.Integer, nullable=False)
     thumbnail = db.Column(db.String(500))

@@ -1,0 +1,101 @@
+{% extends "main.html" %} {% block title %} elEARN | Course {% endblock %} {%
+block content %}
+
+<br />
+<div style="text-shadow: 2px 2px black; display: flex; justify-content: center">
+  <h1 style="margin: 2rem">{{ course.title }}</h1>
+</div>
+
+<div
+  style="text-shadow: 2px 2px black; display: flex; justify-content: center"
+  id="congrats"
+>
+  <h2 style="margin: 2rem">Congrats on Finishing the course!!!</h2>
+</div>
+
+<!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+<div
+  class="youtube"
+  style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  "
+>
+  <div id="player"></div>
+  <button
+    type="button"
+    class="btn btn-secondary"
+    style="margin-top: 2rem"
+    id="saveProgress"
+  >
+    Save Progress
+  </button>
+</div>
+
+<script>
+  const congrats = document.getElementById("congrats");
+  const video = document.querySelector(".youtube");
+  congrats.style.display = "none";
+
+  // 2. This code loads the IFrame Player API code asynchronously.
+  var tag = document.createElement("script");
+
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName("script")[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  // 3. This function creates an <iframe> (and YouTube player)
+  //    after the API code downloads.
+  var player;
+  var duration;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player("player", {
+      height: "487.5",
+      width: "800",
+      videoId: "{{ course.video_id }}",
+      playerVars: {
+        playsinline: 1,
+      },
+      events: {
+        onReady: onPlayerReady,
+      },
+    });
+  }
+
+  // 4. The API will call this function when the video player is ready.
+
+  function onPlayerReady(event) {
+    duration = event.target.getDuration();
+    let percentWatched = parseInt("{{ enrolled.percent_complete}}");
+    let timeStart = ((percentWatched / 100) * duration).toFixed(2);
+    event.target.seekTo(timeStart);
+    event.target.playVideo();
+  }
+
+  const saveBtn = document.getElementById("saveProgress");
+  saveBtn.addEventListener("click", async (event) => {
+    let currentTime = player.getCurrentTime();
+    let percentage = Math.floor((currentTime / duration) * 100);
+    let response = await fetch(
+      `/user/courses/update/{{ course.id }}?percent_complete=${percentage}`
+    );
+    let data = await response.json();
+    if (data.success) {
+      if (percentage === 100) {
+        completed();
+      } else {
+        alert("Progress saved!");
+      }
+    } else {
+      alert("An error occurred");
+    }
+  });
+  function completed() {
+    video.style.display = "none";
+    congrats.style.display = "block";
+  }
+</script>
+
+{% endblock %}

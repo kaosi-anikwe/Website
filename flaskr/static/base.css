@@ -1,6 +1,5 @@
 body {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
+  padding: 3rem;
   color: #5a5a5a;
 }
 
@@ -23,6 +22,12 @@ a:active {
   padding-top: 20px;
   padding-left: 80%;
   align-content: flex-end;
+}
+
+.show-course {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .carousel {

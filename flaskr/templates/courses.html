@@ -43,12 +43,18 @@ Courses{% endblock %}
         {% if course['enrolled'] %}
         <button class="btn btn-secondary" disabled>Enrolled</button>
         {% else %}
-        <button class="btn btn-secondary">Enroll</button>
+        <button
+          class="btn btn-secondary"
+          id="enroll-btn"
+          data-id="{{ course['course_id'] }}"
+        >
+          Enroll
+        </button>
         {% endif %}
       </div>
     </div>
   </div>
   {% endfor %}
 </div>
-
+<script src="../static/admin/static/js/courses.js"></script>
 {% endblock %}

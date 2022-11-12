@@ -1,0 +1,102 @@
+{% extends "main.html" %} {% block title %}elEARN | Users {% endblock %} {%
+block content %}
+<br />
+<div style="text-shadow: 2px 2px black">
+  <h1 style="margin: 2rem">Students</h1>
+</div>
+<div class="row">
+  <div class="col-4">
+    <div class="list-group" id="list-tab" role="tablist">
+      {% for i in range(users|length) %} {% if i == 0 %}
+      <a
+        class="list-group-item list-group-item-action active"
+        id="list-{{ users[i].id }}-list"
+        data-toggle="list"
+        href="#list-{{ users[i].id }}"
+        role="tab"
+        aria-controls="{{ users[i].id }}"
+        >{{ users[i].firstname }} {{ users[i].lastname }}</a
+      >
+      {% else %}
+      <a
+        class="list-group-item list-group-item-action"
+        id="list-{{ users[i].id }}-list"
+        data-toggle="list"
+        href="#list-{{ users[i].id }}"
+        role="tab"
+        aria-controls="{{ users[i].id }}"
+        >{{ users[i].firstname }} {{ users[i].lastname }}</a
+      >
+      {% endif %} {% endfor %}
+    </div>
+  </div>
+  <div class="col-8">
+    <div class="tab-content" id="nav-tabContent">
+      {% for i in range(users|length) %} {% if i == 0 %}
+      <div
+        class="tab-pane fade show active"
+        id="list-{{ users[i].id }}"
+        role="tabpanel"
+        aria-labelledby="list-{{ users[i].id }}-list"
+      >
+        {% if courses[i] %}
+        <ul class="list-group list-group-flush">
+          {% for j in range(courses[i]|length) %}
+          <li class="list-group-item">
+            <div class="show-course">
+              {{ courses[i][j].title }}
+              <span>{{ enrolled[i][j].percent_complete }}% complete</span>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <h6>No enrolled courses</h6>
+        {% endif %}
+        <a href="/user/edit-user/{{ users[i].id }}">
+          <button
+            class="btn btn-secondary"
+            type="button"
+            style="margin-top: 10px"
+          >
+            Edit User
+          </button>
+        </a>
+      </div>
+      {% else %}
+      <div
+        class="tab-pane fade"
+        id="list-{{ users[i].id }}"
+        role="tabpanel"
+        aria-labelledby="list-{{ users[i].id }}-list"
+      >
+        {% if courses[i] %} {% for j in range(courses[i]|length) %}
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <div class="show-course">
+              {{ courses[i][j].title }}
+              <span>{{ enrolled[i][j].percent_complete }}% complete</span>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <h6>No enrolled courses</h6>
+        {% endif %}
+
+        <a href="/user/edit-user/{{ users[i].id }}">
+          <button
+            class="btn btn-secondary"
+            type="button"
+            style="margin-top: 10px"
+          >
+            Edit User
+          </button>
+        </a>
+      </div>
+      {% endif %} {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock%}

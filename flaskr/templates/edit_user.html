@@ -1,0 +1,61 @@
+{% extends "main.html" %} {% block title %}elEARN | Edit User {% endblock %} {%
+block content %}
+<style>
+  body {
+    padding: 3rem;
+  }
+</style>
+<br />
+<div style="text-shadow: 2px 2px black">
+  <h1 style="margin: 2rem">Edit {{ user.firstname }}'s courses</h1>
+</div>
+<form action="/user/edit-user/{{ user.id }}" method="post">
+  {% for i in range(courses|length) %}
+
+  <div class="form-check" style="margin-bottom: 20px">
+    {% if enrolled[i] %}
+    <input
+      class="form-check-input"
+      type="checkbox"
+      checked
+      name="courses"
+      value="{{ courses[i].id }}"
+      id="defaultCheck{{ courses[i].id }}"
+    />
+    {% else %}
+    <input
+      class="form-check-input"
+      type="checkbox"
+      name="courses"
+      value="{{ courses[i].id }}"
+      id="defaultCheck{{ courses[i].id }}"
+    />
+    {% endif %}
+
+    <label
+      class="form-check-label"
+      for="defaultCheck{{ courses[i].id }}"
+      style="vertical-align: middle"
+    >
+      <h5 style="vertical-align: middle">{{ courses[i].title }}</h5>
+    </label>
+    {% if enrolled[i] %}
+    <div class="progress">
+      <div
+        class="progress-bar"
+        role="progressbar"
+        style="width: {{ enrolled[i].percent_complete }}%"
+        aria-valuenow="{{ enrolled[i].percent_complete}}"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        {{ enrolled[i].percent_complete}}%
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  {% endfor %}
+  <button type="submit" class="btn btn-secondary">Save Changes</button>
+</form>
+{% endblock%}

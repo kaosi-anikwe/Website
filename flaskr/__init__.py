@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -26,12 +27,22 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config['SQLALCHEMY_POOL_RECYCLE'] = 60
 
+    CORS(app, resources={r"/*": {"origins": "*"}})
+
     login_manager.login_view = "auth.signin"
     db.init_app(app)
     migrate.init_app(app)
     login_manager.init_app(app)
-    with app.app_context():
-        db.create_all()
+
+    @app.after_request
+    def after_request(response):
+        response.headers.add(
+            "Access-Control-Allow-Headers", "Content-Type, Authorization, true"
+        )
+        response.headers.add(
+            "Access-Control-Allow-Methods", "GET, POST, DELETE, PATCH, OPTIONS"
+        )
+        return response
 
     # blueprint for auth routes in our app
     from .auth import auth as auth_blueprint
