@@ -20,31 +20,45 @@
     <!--Fixed navbar-->
     <header>
       <nav class="navbar navbar-expand-md navbar-light fixed-top bg-light" style="margin-bottom: 1rem;">
-        <a class="navbar-brand" href="#">elEARN</a>
+        <a class="navbar-brand" href="{{ url_for('auth.landing') }}">elEARN</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="{{ url_for('auth.landing') }}">Home <span class="sr-only">(current)</span></a>
+              <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
             </li>
+            {% if current_user.is_active %}
             <li class="nav-item">
               <a class="nav-link" href="/courses">Courses</a>
             </li>
-            <li class="nav-item">
+              {% if current_user.account != "student" %}
+             <li class="nav-item">
               <a class="nav-link" href="/courses/add-course">Add Course</a>
-            </li>
+            </li>           
+            {% endif %}
+            {% if current_user.account != "student" %}
             <li class="nav-item">
-                <a class="nav-link " href="#">About Us</a>
+              <a class="nav-link" href="/user/edit-user">Edit User</a>
+            </li>            
+            {% endif %}   
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link " href="/about">About Us</a>
               </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Contact Us</a>
+              <a class="nav-link" href="/contact">Contact Us</a>
             </li>
           </ul>
           <form class="form-inline mt-2 mt-md-0">
+            {% if current_user.is_active %}
+            <a class="nav-link text-dark" href="/logout">Logout</a>
+            {% else %}
               <a class="nav-link text-dark" href="/signup">Sign Up</a>
-              <a class="nav-link text-dark" href="/login">Login</a>
+              <a class="nav-link text-dark" href="/login">Login</a>            
+            {% endif %}
+
           </form>
         </div>
       </nav>
@@ -69,7 +83,7 @@
         <p class="float-right"><a href="#">Back to top</a></p>
         <p>&copy; 2017-2018 elEARN, Inc. &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a></p>
       </footer>
-    
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>

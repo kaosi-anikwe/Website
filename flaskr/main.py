@@ -108,17 +108,17 @@ def show_course(course_id):
 @login_required
 def enroll(course_id):
     # enroll in a course
-    # try:
-    enrolled = Enrolled()
-    course = Courses.query.get(course_id)
-    enrolled.course = course
-    enrolled.user_id = current_user.id
-    current_user.courses.append(enrolled)
-    current_user.update()
+    try:
+        enrolled = Enrolled()
+        course = Courses.query.get(course_id)
+        enrolled.course = course
+        enrolled.user_id = current_user.id
+        current_user.courses.append(enrolled)
+        current_user.update()
 
-    return jsonify({"success": True})
-    # except:
-    #     return jsonify({"success": False})
+        return jsonify({"success": True})
+    except:
+        return jsonify({"success": False})
 
 
 @main.route("/courses/add-course", methods=["GET", "POST"])
@@ -169,14 +169,7 @@ def complete(course_id):
     try:
         enrolled_course.completed == True
         enrolled_course.update()
-        #         for course in enrolled_courses:
-        #             if course.user_id == current_user.id and course.course_id == course_id:
-        #                 if not course.completed:
-        #                     course.completed = True
-        #                     course.percent_complete = 100
-        #                     current_user.update()
-        #                     break
-
+        
         return jsonify({"success": True})
     except:
         return jsonify({"success": False})

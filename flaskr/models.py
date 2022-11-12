@@ -51,11 +51,12 @@ class Users(UserMixin, db.Model):
     account = db.Column(db.String(12), default="student", nullable=False)
     courses = db.relationship("Enrolled", back_populates="user")
 
-    def __init__(self, firstname, lastname, email, password):
+    def __init__(self, firstname, lastname, email, password, account):
         self.firstname = firstname
         self.lastname = lastname
         self.email = email
         self.password = password
+        self.account = account
 
     def insert(self):
         db.session.add(self)

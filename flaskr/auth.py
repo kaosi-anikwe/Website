@@ -57,41 +57,35 @@ def signup():
 
 @auth.route("/signup", methods=["POST"])
 def signup_page():
-    # if method post in index
-    # if "email" in session:
-    #     return redirect(url_for("logged_in"))
     req = request.form
-    print(req)
-    # Validating Empty Fields
-    missing = list()
-    # Getting Immutable Multi Dict Data
-    for k, v in req.items():
-        if v == "":
-            missing.append(k)
 
-    if missing:
-        comment = f"Missing field: {',  '.join(missing)}".title()
-        return render_template("thanks.html", comment=comment, miss=True)
-    else:
+    try:
         # getting form data
         fname = req.get("firstname")
         lname = req.get("lastname")
         email = req.get("email")
         password = req.get("password")
+        account = req.get("account") if req.get("account") else "student"
         rpassword = req.get("repeatpassword")
         print(fname, lname, email, password, rpassword)
         if password != rpassword:
-            comment = "Password doesn't match"
-            return render_template("thanks.html", comment=comment, miss=True)
+            flash("Password doesn't match")
+            return redirect(url_for("auth.signup"))
         else:  # adding record in database
             # hash the password and encode it
             hashed = getHashed(password)
-            # hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
-            new_user = Users(fname, lname, email, hashed)
+            new_user = Users(fname, lname, email, hashed, account)
             new_user.insert()
 
-            session["email"] = email
-            session["password"] = password
+            return redirect(url_for("auth.login"))
+    except:
+        return redirect(url_for("auth.landing"))
 
-            return render_template("thanks.html", success=True)
+@auth.route("/about")
+def about():
+    return render_template("about.html")
+
+@auth.route("/contact")
+def contact():
+    return render_template("contact.html")
